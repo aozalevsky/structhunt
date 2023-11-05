@@ -1,5 +1,5 @@
 import psycopg2
-import Fragment, Publication
+import fragment, publication
 
 class Latern: 
     conn = ""
@@ -56,7 +56,7 @@ class Latern:
         conn.commit()
         cursor.close()
 
-    def insertEmbedding(self, fragment: Fragment):
+    def insertEmbedding(self, fragment: fragment):
         conn = self.conn
         cursor = conn.cursor()
 

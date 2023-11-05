@@ -1,4 +1,4 @@
-from Fragment import Fragment
+from fragment import Fragment
 from VectorDatabase import Latern
 from tqdm.auto import tqdm
 from sentence_transformers import SentenceTransformer
