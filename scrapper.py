@@ -1,8 +1,9 @@
 import os
-import pandas as pd    
+import pandas as pd
 import PyPDF2
 from paperscraper.pdf import save_pdf
 from paperscraper.get_dumps import biorxiv
+from paperscraper.load_dumps import QUERY_FN_DICT
 
 import openai
 from langchain.document_loaders.csv_loader import CSVLoader
@@ -17,9 +18,11 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain import PromptTemplate
 import PyPDF2
-from publication import Publication
+
 from VectorDatabase import Lantern
 from fragment import Fragment
+from publication import Publication
+
 
 # OpenAI Setup
 OPEN_API_KEY = "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"
@@ -38,7 +41,7 @@ def get_embeddings(fname):
     documents = loader.load()
     text_splitter = CharacterTextSplitter(separator = ".",chunk_size = 1000, chunk_overlap=0)
     docs = text_splitter.split_documents(documents)
-    
+
     emb = OpenAIEmbeddings()
     input_texts = [d.page_content for d in docs]
 
@@ -47,18 +50,22 @@ def get_embeddings(fname):
     return text_embeddings, emb
 
 def retreiveTextFromPdf(inp_file):
-    
+
 
     json = pd.read_json(path_or_buf=inp_file, lines=True)
-    print(len(json['doi']))
-    Lantern = Lantern()
+    lantern = Lantern()
 
     for n, doi in enumerate(json['doi']):
         print(n, doi)
 
-        if Lantern.publicationExists(doi):
+
+        ##NOTE: This is for example purpose only
+        if n > 10:
+            break
+
+        if lantern.publicationExists(doi):
             continue
-        
+
         paper_data = {'doi': doi}
         doi = doi.replace("/", "-")
         pdf_dir = './papers/'
@@ -66,9 +73,8 @@ def retreiveTextFromPdf(inp_file):
             os.mkdir(pdf_dir)
 
         pdfsavefile='./papers/' + doi +'.pdf'
-        print(paper_data, pdfsavefile)
         save_pdf(paper_data, filepath=pdfsavefile)
-        
+
         # creating a pdf reader object
         reader = PyPDF2.PdfReader(pdfsavefile)
         save_txt_path = 'scrapped_txts/'
@@ -81,24 +87,24 @@ def retreiveTextFromPdf(inp_file):
         txt_file = str('{}.txt'.format(doi))
         with open(save_txt_path+txt_file, 'w') as file:
             file.write(extract_text)
-        
-        
+
+
         txt_embs, emb = get_embeddings(save_txt_path+txt_file)
-            
+
         fragments = []
         for txt, embs in txt_embs:
             fragment = Fragment(doi, 'methods', txt, embs)
             fragments.append(fragment)
-            
+
         title = ""
         pmc = ""
         pubmed = ""
 
         publication = Publication(doi, title, pmc, pubmed, doi)
-        
-        Lantern.insertEmbeddings(fragments)
-        Lantern.insertPublication(publication)
-        
+
+        lantern.insertEmbeddings(fragments)
+        lantern.insertPublication(publication)
+
         os.remove(pdfsavefile)
 
 start_date = "2023-10-30"
@@ -106,3 +112,7 @@ end_date = "2023-10-31"
 out_file = "bio.jsonl"
 
 scrapeBiorxiv(start_date, end_date, out_file)
+
+biology = ['Bioinformatics', 'Molecular Biology', 'Bioengineering', 'Biochemistry']
+query = [biology]
+QUERY_FN_DICT['biorxiv'](query, output_filepath='keywords.jsonl')
