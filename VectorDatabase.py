@@ -3,7 +3,7 @@ from publication import Publication
 
 import psycopg2
 
-class Latern: 
+class Lantern: 
     conn = ""
 
     def __init__(self, database="structdb"):
@@ -95,13 +95,14 @@ class Latern:
         conn.commit()
         cursor.close()
 
-    def insertPublication(self, publication):
+    def insertPublication(self, p):
         conn = self.conn
         cursor = conn.cursor()
-        p = publication
 
-        cursor.execute("INSERT INTO publications (id, title, pmc, pubmed, doi) VALUES (%s, %s, %s, %s, %s);", (p.id, p.title, p.pmc. p.pubmed, p.doi))
-        cursor.execute("INSERT INTO unread (id) VALUES (%s);", p.id)
+        cursor.execute("INSERT INTO publications (id, title, pmc, pubmed, doi) VALUES (%s, %s, %s, %s, %s);", (p.id, p.title, p.pmc, p.pubmed, p.doi))
+        
+        query='INSERT INTO unread (id) VALUES (\'{:s}\');'.format(p.id)
+        cursor.execute(query)
         conn.commit()
         cursor.close()
 
@@ -128,19 +129,30 @@ class Latern:
         conn = self.conn
         cursor = conn.cursor()
 
-        cursor.execute('SELECT * FROM publications AS p LEFT JOIN unread AS u WHERE p.id=u.id;')
-        cursor.execute('DELETE FROM unread;')
+        cursor.execute('SELECT * FROM publications AS p LEFT JOIN unread AS u ON u.id=p.id;')
 
         publications = cursor.fetchall()
+
+        cursor.execute('DELETE FROM unread;')
         conn.commit()
         cursor.close()
 
 
         publicationObjects = []
         for p in publications:
-            publicationObjects.append(Publication(p[0], p[1], p[2], p[3], p[4], p[5]))
+            publicationObjects.append(Publication(p[0], p[1], p[2], p[3], p[4]))
 
         return publicationObjects
+    
+    def publicationExists(self, id):
+        conn = self.conn
+        cursor = conn.cursor()
 
+        query='SELECT COUNT(*) FROM publications WHERE id=\'{:s}\''.format(id)
+        cursor.execute(query)
+        count = cursor.fetchone()
+        conn.commit()
+        cursor.close()
 
+        return count[0] == 1
 

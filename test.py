@@ -1,4 +1,5 @@
 from fragment import Fragment
+from publication import Publication
 from VectorDatabase import Latern
 from tqdm.auto import tqdm
 from sentence_transformers import SentenceTransformer
@@ -25,30 +26,32 @@ def random_string():
     N=7
     return ''.join(random.choices(string.ascii_letters, k=N))
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-if device != 'cuda':
-    print(f"You are using {device}. This is much slower than using "
-          "a CUDA-enabled GPU. If on Colab you can change this by "
-          "clicking Runtime > Change runtime type > GPU.")
+# device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# if device != 'cuda':
+#     print(f"You are using {device}. This is much slower than using "
+#           "a CUDA-enabled GPU. If on Colab you can change this by "
+#           "clicking Runtime > Change runtime type > GPU.")
 
-model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
-model
+# model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
+# model
 
-pmcid = 'PMC10081221'
-text = get_pmc_paper(pmcid)
-sentences = get_sentence_from_text(text)
+# pmcid = 'PMC10081221'
+# text = get_pmc_paper(pmcid)
+# sentences = get_sentence_from_text(text)
 
 
-fragments = []
-for i in tqdm(range(0, len(sentences))):
-    content = sentences[i]
-    vector = [float(x) for x in model.encode(sentences[i])]
-    id = random_string()
-    fragments.append(Fragment("ID", content[0], content, vector))
+# fragments = []
+# for i in tqdm(range(0, len(sentences))):
+#     content = sentences[i]
+#     vector = [float(x) for x in model.encode(sentences[i])]
+#     id = random_string()
+#     fragments.append(Fragment("ID", content[0], content, vector))
 
-vd.insertEmbeddings(fragments)
-fragments = vd.getAllFragmentsOfPublication("ID")
+# vd.insertEmbeddings(fragments)
+# vd.insertPublication(Publication("ID", "Hi", "", "", ""))
+print(vd.publicationExists("10.1101-2022.03.14.484202"))
+print(vd.publicationExists("P"))
 
-for fragment in fragments:
-    print(fragment.vector)
+print(vd.getUnreadPublication())
+
 
