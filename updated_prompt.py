@@ -20,6 +20,7 @@ import time
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
@@ -35,7 +36,7 @@ os.environ['OPENAI_API_KEY'] = openai_api_key
 
 llm = ChatOpenAI(
             openai_api_key=openai_api_key,
-            temperature=0, model_name="gpt-4", max_tokens=300, request_timeout = 30, max_retries=3
+            temperature=0, model_name="gpt-3.5-turbo", max_tokens=300, request_timeout = 30, max_retries=3
         )
 
 
@@ -236,8 +237,8 @@ def get_pmcid_from_pmc_url(pmcurl):
 
 def load_file(infile):
     table = pd.read_excel(infile)
-    b = table[~pd.isna(table['method_0'])].sample(n=10, random_state=42)
-    c = table[pd.isna(table['method_0'])].sample(n=10, random_state=42)
+    b = table[~pd.isna(table['method_0'])].sample(n=10)
+    c = table[pd.isna(table['method_0'])].sample(n=10)
     new_list = [b, c]
     #print(b)
     #print(c)
@@ -290,9 +291,23 @@ y_pred = embed_all(pmcid_list)
 #print(y_pred)
 #print(y_test)
 create_confusion(y_test, y_pred)
+#Accuracy 1-4.0: 0.8
+#Accuracy 2-4.0: 0.85
+#Accuracy 3-4.0: 0.8
 
-s = 'No, the text does not mention any of the listed methods.'
-print(result_to_bool(s))
+#Average Accuracy --> 4.0: 0.82
+#Standard Deviation --> 4.0: 0.024
+
+#Accuracy 1-3.5: 0.6
+#Accuracy 2-3.5: 0.7
+#Accuracy 3-3.5: 0.55
+
+#Average Accuracy --> 3.5: 0.62
+#Standard Deviation --> 0.062
+
+
+
+
 
 def main():
     #silly example
