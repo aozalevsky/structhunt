@@ -5,14 +5,14 @@
 
 
 import os
+import re
 import openai
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import TextLoader
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 
 import re
 import requests
@@ -189,58 +189,82 @@ def fetch_embedding(pmcid):
         print('failure')
         return embed_article(pmcid)
 
-def embed_all():
+def result_to_bool(result):
+    flag = False
+    if re.match('Yes', result, re.IGNORECASE):
+        flag = True
+    return flag
+
+def embed_all(pmc_ids):
     #pmc_ids = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004', 
     #'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC9279154']
-    pmc_ids = ['PMC8660637', 'PMC5864754', 'PMC8052403', 'PMC7441595', 'PMC5422253', 'PMC5288503', 'PMC6981184']
     y_test = []
-    y_pred = [True, True, True, True, True, True, True]
     for pmcid in pmc_ids:
         embedding = fetch_embedding(pmcid)
         queries = [f"You are reading a materials and methods section of a scientific paper. Here is the list of methods {methods_string}.\n\n Did the authors use any of them? Answer Yes or No, followed by the name(s) of methods. Use only abbreviations."],
         
         result = evaluate_query(embedding, queries)
         
-        if "Yes" in result:
+        has_yes = result_to_bool(result)
+        if has_yes:
             val = True
             y_test.append(val)
         else:
             val = False 
             y_test.append(val)
 
-
-        
         print(pmcid)
         print(result)
         print('-' * 80)
         time.sleep(5)
-    print(y_test)
+    return y_test
 
-y_pred = [True, True, True, True, True, True, True]
-y_test = [False, True, True, True, True, False, True]
-def create_confusion(y_pred, y_test):
+#y_pred = [True, True, True, True, True, True, True]
+#y_test = [False, True, True, True, True, False, True]
+def create_confusion(y_test, y_pred):
     cm = confusion_matrix(y_test, y_pred, labels=[True, False])
+    print(accuracy_score(y_test, y_pred))
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,
                               display_labels=['True', 'False'])
     disp.plot()
     plt.show()
 
 
-infile = "data.csv"
+#infile = "data.csv"
+def get_pmcid_from_pmc_url(pmcurl):
+    return re.split('/', pmcurl)[-1]
+
 def load_file(infile):
-    table = pd.read_csv(infile)
-    b = table[~pd.isnull(table['method_0'])].sample(n=10)
+    table = pd.read_excel(infile)
+    b = table[~pd.isna(table['method_0'])].sample(n=10, random_state=42)
+    c = table[pd.isna(table['method_0'])].sample(n=10, random_state=42)
+    new_list = [b, c]
+    #print(b)
+    #print(c)
+    links = pd.concat(new_list)
     pmc_ids = []
-    for index, row in b.iterrows():
-        print(row['pmc'])
-
-
+    y_test = []
+    for index, row in links.iterrows():
+        row_link = row['pmc']
+        pmc_num = get_pmcid_from_pmc_url(row_link)
+        pmc_ids.append(pmc_num)
+        #print(row["method_0"])
+        #print(not pd.isnull(row["method_0"]))
+        #print(~pd.isna(row['method_0']))
+        #print(not pd.isna(row['method_0']))
         
+        if not pd.isna(row['method_0']):
+            val = True
+            y_test.append(val)
+        else:
+            val = False
+            y_test.append(val)
+
     
+    return y_test, pmc_ids
 
 
-
-load_file(infile)
+#create_confusion(y_pred, y_test)
 #create_confusion(y_pred, y_test)
 def evaluate_query(embedding, queries):
     chatbot = RetrievalQA.from_chain_type(
@@ -260,9 +284,15 @@ def evaluate_query(embedding, queries):
         return(chatbot.run(
             prompt.format(query=q)
         ))    
+infile = "data_qbi_all.xlsx"
+y_test, pmcid_list = load_file(infile)
+y_pred = embed_all(pmcid_list)
+#print(y_pred)
+#print(y_test)
+create_confusion(y_test, y_pred)
 
-
-embed_all()
+s = 'No, the text does not mention any of the listed methods.'
+print(result_to_bool(s))
 
 def main():
     #silly example
