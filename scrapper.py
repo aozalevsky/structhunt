@@ -18,7 +18,7 @@ from langchain.chains import RetrievalQA
 from langchain import PromptTemplate
 import PyPDF2
 from publication import Publication
-from VectorDatabase import Latern
+from VectorDatabase import Lantern
 from fragment import Fragment
 
 # OpenAI Setup
@@ -51,12 +51,13 @@ def retreiveTextFromPdf(inp_file):
 
     json = pd.read_json(path_or_buf=inp_file, lines=True)
     print(len(json['doi']))
-    
+    Lantern = Lantern()
+
     for n, doi in enumerate(json['doi']):
         print(n, doi)
-        
-#         if latern.publication_exists(doi):
-#             continue
+
+        if Lantern.publicationExists(doi):
+            continue
         
         paper_data = {'doi': doi}
         doi = doi.replace("/", "-")
@@ -84,8 +85,6 @@ def retreiveTextFromPdf(inp_file):
         
         txt_embs, emb = get_embeddings(save_txt_path+txt_file)
             
-        for txt,embs in txt_embs:
-
         fragments = []
         for txt, embs in txt_embs:
             fragment = Fragment(doi, 'methods', txt, embs)
@@ -97,9 +96,8 @@ def retreiveTextFromPdf(inp_file):
 
         publication = Publication(doi, title, pmc, pubmed, doi)
         
-        latern = Latern()
-        latern.insertEmbeddings(fragments)
-        latern.insertPublication(publication)
+        Lantern.insertEmbeddings(fragments)
+        Lantern.insertPublication(publication)
         
         os.remove(pdfsavefile)
 

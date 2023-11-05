@@ -49,9 +49,9 @@ def random_string():
 
 # vd.insertEmbeddings(fragments)
 # vd.insertPublication(Publication("ID", "Hi", "", "", ""))
-print(vd.publicationExists("ID"))
+print(vd.publicationExists("10.1101-2022.03.14.484202"))
 print(vd.publicationExists("P"))
 
-# print(vd.getUnreadPublication())
+print(vd.getUnreadPublication())
 
 
