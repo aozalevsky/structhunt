@@ -44,6 +44,26 @@ def extract_methods_from_pmc_paper(paper):
 
     return " ".join(mtext)
 
+def preprocess(input_text):
+    processed_data = input_text.replace("\n","")
+    return processed_data
+
+def embed_article(pmcid):
+    text = get_pmc_paper(pmcid)
+    methods_text = preprocess(extract_methods_from_pmc_paper(text))
+    filepath = f'./data/{pmcid}'
+    with open(filepath + '.txt', 'w') as file:
+        file.write(methods_text)
+
+
+    loader = TextLoader(f"./{filepath}")
+    documents = loader.load()
+    text_splitter = CharacterTextSplitter(separator = ".", chunk_size=1000, chunk_overlap=0)
+    docs = text_splitter.split_documents(documents)
+
+    faissIndex = FAISS.from_documents(docs, OpenAIEmbeddings())
+    faissIndex.save_local(filepath)
+
 def run_test(pmcid: str, queries: [str]):
     ## Write to file
     # pmcid = 'PMC9935389' 
@@ -62,7 +82,7 @@ def run_test(pmcid: str, queries: [str]):
     faissIndex = FAISS.from_documents(docs, OpenAIEmbeddings())
     current_document = "input_doc"
     faissIndex.save_local(current_document)
-
+    #embeddings have been saved
 
     chatbot = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(
@@ -94,8 +114,31 @@ def run_test(pmcid: str, queries: [str]):
 
     # 
 
+def fetch_embedding(pmcid):
+    #if os.path.isfile(f'./data/{pmc}.txt'):
+    pass
+
+def compare_against_known():
+    # only asking "are there more methodologies beyond "
+    queries = ["Are there experimental techniques beyond using Cryo-Em incorporated in the paper? Answer with Yes or No followed by the experimental technique."]
+    pmc_ids_false = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004']
+    pmc_ids_true = ['PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC8916737']
+
+    for pmc in pmc_ids_false:
+        #run_test(pmc, )
+        pass
+
+def embed_all():
+    pmc_ids = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004', 
+    'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC8916737']
+    for pmc in pmc_ids:
+        embed_article(pmc)
+
 
 def main():
     #silly example
     queries = ["how many", "how much"]
     run_test(pmcid='PMC23402394802394', queries=queries)
+
+    
+embed_all()
