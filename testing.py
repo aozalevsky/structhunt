@@ -17,7 +17,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 
 
 # OPENAI SETUP
@@ -52,17 +52,21 @@ def embed_article(pmcid):
     text = get_pmc_paper(pmcid)
     methods_text = preprocess(extract_methods_from_pmc_paper(text))
     filepath = f'./data/{pmcid}'
-    with open(filepath + '.txt', 'w') as file:
+    txtfilepath = filepath + '.txt'
+    with open(txtfilepath, 'w', encoding="utf-8") as file:
         file.write(methods_text)
 
+    print('text copied')
 
-    loader = TextLoader(f"./{filepath}")
+    loader = TextLoader(txtfilepath, autodetect_encoding=True)
     documents = loader.load()
     text_splitter = CharacterTextSplitter(separator = ".", chunk_size=1000, chunk_overlap=0)
     docs = text_splitter.split_documents(documents)
 
     faissIndex = FAISS.from_documents(docs, OpenAIEmbeddings())
     faissIndex.save_local(filepath)
+    return FAISS.load_local(filepath, OpenAIEmbeddings())
+
 
 def run_test(pmcid: str, queries: [str]):
     ## Write to file
@@ -115,8 +119,14 @@ def run_test(pmcid: str, queries: [str]):
     # 
 
 def fetch_embedding(pmcid):
-    #if os.path.isfile(f'./data/{pmc}.txt'):
-    pass
+    try:
+        filepath = f'./data/{pmcid}'
+        return FAISS.load_local(filepath, OpenAIEmbeddings())
+    except e:
+        print(e)
+        print('failure')
+        return embed_article(pmcid)
+
 
 def compare_against_known():
     # only asking "are there more methodologies beyond "
@@ -131,8 +141,8 @@ def compare_against_known():
 def embed_all():
     pmc_ids = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004', 
     'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC8916737']
-    for pmc in pmc_ids:
-        embed_article(pmc)
+    for pmcid in pmc_ids:
+        fetch_embedding(pmcid)
 
 
 def main():
@@ -140,5 +150,4 @@ def main():
     queries = ["how many", "how much"]
     run_test(pmcid='PMC23402394802394', queries=queries)
 
-    
-embed_all()
+print(fetch_embedding('PMC8536336'))
