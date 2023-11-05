@@ -1,5 +1,5 @@
 import psycopg2
-import Fragment, Publication
+import fragment, publication
 
 class Latern: 
     conn = ""
@@ -56,7 +56,7 @@ class Latern:
         conn.commit()
         cursor.close()
 
-    def insertEmbedding(self, fragment: Fragment):
+    def insertEmbedding(self, fragment: fragment):
         conn = self.conn
         cursor = conn.cursor()
 
@@ -75,7 +75,7 @@ class Latern:
             queries.append((fragment.pdbid, fragment.header, fragment.content, fragment.vector))
         
         cursor.executemany("INSERT INTO fragments (pdbid, header, content, vector) VALUES (%s, %s, %s, %s);", queries)
-        cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + str(fragment.VECTOR_LENGTH) + ");")
+        cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + str(len(fragments[0])) + ");")
         conn.commit()
         cursor.close()
 

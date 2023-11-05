@@ -120,7 +120,7 @@ def main():
         fragments.append(fragment)
         
     latern = Latern()
-    
+    print(fragments)
     latern.insertEmbeddings(fragments)
     
     # retreieve. PMC
@@ -128,3 +128,4 @@ def main():
     inp_query = "Does the paper report a new structure of a biomolecule or biomolecular complex modeled using experimental data"
     Query(inp_query, faissIndex)
     
+main()

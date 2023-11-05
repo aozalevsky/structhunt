@@ -1,7 +1,4 @@
 class Fragment:
-
-    VECTOR_LENGTH=384
-
     pdbid = ""
     header = ""
     content = ""
