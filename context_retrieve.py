@@ -16,6 +16,9 @@ import re
 import requests
 import xml.etree.ElementTree as ET
 
+from fragment import Fragment
+from VectorDatabase import Latern
+
 
 
 # OpenAI Setup
@@ -116,9 +119,9 @@ def main():
         fragment = Fragment(pmcid, 'methods', txt, embs)
         fragments.append(fragment)
         
-    lantern = Lantern()
+    latern = Latern()
     
-    lantern.insertEmbeddings(fragments)
+    latern.insertEmbeddings(fragments)
     
     # retreieve. PMC
     faissIndex = FAISS.from_embeddings(text_embeddings=txt_embs, embedding=emb)
