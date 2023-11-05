@@ -36,7 +36,7 @@ os.environ['OPENAI_API_KEY'] = openai_api_key
 
 llm = ChatOpenAI(
             openai_api_key=openai_api_key,
-            temperature=0, model_name="gpt-3.5-turbo", max_tokens=300, request_timeout = 30, max_retries=3
+            temperature=0, model_name="gpt-4", max_tokens=300, request_timeout = 30, max_retries=3
         )
 
 
