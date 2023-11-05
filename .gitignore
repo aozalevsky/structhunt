@@ -1,2 +1,5 @@
 data/data.csv
 data/
+input_file.txt
+input_doc/index.faiss
+.gitignore
