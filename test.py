@@ -44,9 +44,11 @@ for i in tqdm(range(0, len(sentences))):
     content = sentences[i]
     vector = [float(x) for x in model.encode(sentences[i])]
     id = random_string()
-    fragments.append(Fragment(id, content[0], content, vector))
+    fragments.append(Fragment("ID", content[0], content, vector))
 
 vd.insertEmbeddings(fragments)
+fragments = vd.getAllFragmentsOfPublication("ID")
 
-
+for fragment in fragments:
+    print(fragment.vector)
 

@@ -58,12 +58,15 @@ def get_embeddings(fname):
     loader = TextLoader(fname)
     documents = loader.load()
     text_splitter = CharacterTextSplitter(separator = ".",chunk_size = 1000, chunk_overlap=0)
+    
     docs = text_splitter.split_documents(documents)
     
     emb = OpenAIEmbeddings()
     input_texts = [d.page_content for d in docs]
+
     input_embeddings = emb.embed_documents(input_texts)
     text_embeddings = list(zip(input_texts, input_embeddings))
+
     return text_embeddings, emb
 
 def saveFassIndex(fname, sname, ):
@@ -120,7 +123,6 @@ def main():
         fragments.append(fragment)
         
     latern = Latern()
-    print(fragments)
     latern.insertEmbeddings(fragments)
     
     # retreieve. PMC

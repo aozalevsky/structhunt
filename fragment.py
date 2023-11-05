@@ -1,11 +1,11 @@
 class Fragment:
-    pdbid = ""
+    id = ""
     header = ""
     content = ""
     vector = ""
 
-    def __init__(self, pdbid, header, content, vector):
-        self.pdbid = pdbid
+    def __init__(self, id, header, content, vector):
+        self.id = id
         self.header = header
         self.content = content
         self.vector = vector

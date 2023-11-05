@@ -1,14 +1,14 @@
 
 class Publication:
 
-    pdbid = ""
+    id = ""
     title = ""
     pmc = ""
     pubmed = ""
     doi = ""
 
-    def __init__(self, pdbid, title, pmc, pubmed, doi):
-        self.pdbid = pdbid
+    def __init__(self, id, title, pmc, pubmed, doi):
+        self.id = id
         self.title = title
         self.pmc = pmc
         self.pubmed = pubmed
