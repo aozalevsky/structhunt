@@ -147,17 +147,18 @@ def embed_all():
     'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC8916737']
     for pmcid in pmc_ids:
         embedding = fetch_embedding(pmcid)
+        print(pmcid)
         result = evaluate_query(embedding, queries)
         print(result)
 
 
-queries = ["Are there experimental techniques beyond using Cryo-Em incorporated in the paper? Answer with Yes or No followed by the experimental technique."]
+queries = ["Are there experimental techniques incorporated in the paper? Do not incorporate Cryo-EM related to structural biology or integrative modeling?"]
 
 def evaluate_query(embedding, queries):
     chatbot = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(
             openai_api_key=openai_api_key,
-            temperature=0, model_name="gpt-3.5-turbo", max_tokens=50, request_timeout = 9, max_retries=0
+            temperature=0, model_name="gpt-4", max_tokens=50, request_timeout = 20, max_retries=1
         ), 
         chain_type="stuff", 
         retriever=embedding.as_retriever(search_type="similarity", search_kwargs={"k":1})
