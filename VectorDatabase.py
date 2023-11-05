@@ -1,8 +1,6 @@
+import psycopg2
 from fragment import Fragment
 from publication import Publication
-
-import psycopg2
-
 class Lantern: 
     conn = ""
 
@@ -90,7 +88,10 @@ class Lantern:
         for fragment in fragments:
             queries.append((fragment.id, fragment.header, fragment.content, fragment.vector))
         
-        cursor.executemany("INSERT INTO fragments (id, header, content, vector) VALUES (%s, %s, %s, %s);", queries)
+        try:
+            cursor.executemany("INSERT INTO fragments (id, header, content, vector) VALUES (%s, %s, %s, %s);", queries)
+        except Exception:
+            print("Error with insertion")
         cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + str(len(fragments[0].vector)) + ");")
         conn.commit()
         cursor.close()
@@ -155,4 +156,3 @@ class Lantern:
         cursor.close()
 
         return count[0] == 1
-
