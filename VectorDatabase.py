@@ -95,13 +95,14 @@ class Latern:
         conn.commit()
         cursor.close()
 
-    def insertPublication(self, publication):
+    def insertPublication(self, p):
         conn = self.conn
         cursor = conn.cursor()
-        p = publication
 
-        cursor.execute("INSERT INTO publications (id, title, pmc, pubmed, doi) VALUES (%s, %s, %s, %s, %s);", (p.id, p.title, p.pmc. p.pubmed, p.doi))
-        cursor.execute("INSERT INTO unread (id) VALUES (%s);", p.id)
+        cursor.execute("INSERT INTO publications (id, title, pmc, pubmed, doi) VALUES (%s, %s, %s, %s, %s);", (p.id, p.title, p.pmc, p.pubmed, p.doi))
+        
+        query='INSERT INTO unread (id) VALUES ({:s});'.format(p.id)
+        cursor.execute(query)
         conn.commit()
         cursor.close()
 
@@ -141,6 +142,16 @@ class Latern:
             publicationObjects.append(Publication(p[0], p[1], p[2], p[3], p[4], p[5]))
 
         return publicationObjects
+    
+    def publicationExists(self, id):
+        conn = self.conn
+        cursor = conn.cursor()
 
+        query='SELECT COUNT(*) FROM publications WHERE id=\'{:s}\''.format(id)
+        cursor.execute(query)
+        count = cursor.fetchone()
+        conn.commit()
+        cursor.close()
 
+        return count[0] == 1
 
