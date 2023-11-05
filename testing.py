@@ -8,9 +8,11 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import TextLoader
 
+
 import re
 import requests
 import xml.etree.ElementTree as ET
+import timeout_decorator
 
 
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -91,7 +93,7 @@ def run_test(pmcid: str, queries: [str]):
     chatbot = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(
             openai_api_key=openai_api_key,
-            temperature=0, model_name="gpt-3.5-turbo", max_tokens=50
+            temperature=0, model_name="gpt-3.5-turbo", max_tokens=50, timeout = 9, max_retries=0
         ), 
         chain_type="stuff", 
         retriever=FAISS.load_local(current_document, OpenAIEmbeddings())
@@ -110,6 +112,8 @@ def run_test(pmcid: str, queries: [str]):
         print(chatbot.run(
             prompt.format(query="Does the paper report a new structure of a biomolecule or biomolecular complex modeled using experimental data")
         ))
+
+    print('finished queries')
 
 
     # function that takes context, prompts, and returns answers 
@@ -142,12 +146,47 @@ def embed_all():
     pmc_ids = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004', 
     'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC8916737']
     for pmcid in pmc_ids:
-        fetch_embedding(pmcid)
+        embedding = fetch_embedding(pmcid)
+        result = evaluate_query(embedding, queries)
+        print(result)
 
+
+queries = ["Are there experimental techniques beyond using Cryo-Em incorporated in the paper? Answer with Yes or No followed by the experimental technique."]
+
+def evaluate_query(embedding, queries):
+    chatbot = RetrievalQA.from_chain_type(
+        llm=ChatOpenAI(
+            openai_api_key=openai_api_key,
+            temperature=0, model_name="gpt-3.5-turbo", max_tokens=50, request_timeout = 9, max_retries=0
+        ), 
+        chain_type="stuff", 
+        retriever=embedding.as_retriever(search_type="similarity", search_kwargs={"k":1})
+
+    )
+    
+    template = """ {query}? """
+    for q in queries:
+        prompt = PromptTemplate(
+            input_variables=["query"],
+            template=template,
+        )
+
+        return(chatbot.run(
+            prompt.format(query=q)
+        ))
+
+
+
+
+    
+
+
+embed_all()
 
 def main():
     #silly example
-    queries = ["how many", "how much"]
+    queries = ["Are there experimental techniques beyond using Cryo-Em incorporated in the paper? Answer with Yes or No followed by the experimental technique."]
     run_test(pmcid='PMC23402394802394', queries=queries)
+
 
 print(fetch_embedding('PMC8536336'))
