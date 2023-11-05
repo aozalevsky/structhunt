@@ -1,5 +1,3 @@
-
-
 class Fragment:
 
     VECTOR_LENGTH=384

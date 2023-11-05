@@ -5,14 +5,14 @@ class Latern:
     conn = ""
 
     def __init__(self, database="structdb"):
-        self.conn = self.connect()
-        self.createTable()
+        self.conn = self.connect(database)
+        self.createTables()
 
 
     def connect(self, database="structdb"):
         # We use the dbname, user, and password that we specified above
         conn = psycopg2.connect(
-            dbname="testdb",
+            dbname=database,
             user="postgres",
             password="postgres",
             host="localhost",
@@ -38,7 +38,7 @@ class Latern:
         # Create the table
         cursor = conn.cursor()
 
-        create_table_query = "CREATE TABLE IF NOT EXISTS fragments (pdbid text FORIEGN key, header text, content text, vector real[]);"
+        create_table_query = "CREATE TABLE IF NOT EXISTS fragments (pdbid text, header text, content text, vector real[]);"
 
         cursor.execute(create_table_query)
 
@@ -60,15 +60,24 @@ class Latern:
         conn = self.conn
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO fragments (pdbid, header, content, vector) VALUES (%s, %s, %s, %s);", (fragment.pdbid, fragment.text, fragment.content, fragment.vector))
-        cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + fragment.VECTOR_LENGTH + ");")
+        cursor.execute("INSERT INTO fragments (pdbid, header, content, vector) VALUES (%s, %s, %s, %s);", (fragment.pdbid, fragment.header, fragment.content, fragment.vector))
+        cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + str(fragment.VECTOR_LENGTH) + ");")
 
         conn.commit()
         cursor.close()
 
     def insertEmbeddings(self, fragments: list):
+        conn = self.conn
+        cursor = conn.cursor()
+
+        queries=[]
         for fragment in fragments:
-            self.insertEmbedding(fragment)
+            queries.append((fragment.pdbid, fragment.header, fragment.content, fragment.vector))
+        
+        cursor.executemany("INSERT INTO fragments (pdbid, header, content, vector) VALUES (%s, %s, %s, %s);", queries)
+        cursor.execute("CREATE INDEX ON fragments USING hnsw (vector dist_cos_ops) WITH (dim=" + str(fragment.VECTOR_LENGTH) + ");")
+        conn.commit()
+        cursor.close()
 
     def insertPublication(self, publication):
         conn = self.conn
@@ -80,6 +89,15 @@ class Latern:
         conn.commit()
         cursor.close()
 
-    
+    def getAllFragmentsOfPublication(self, pdbid):
+        conn = self.conn
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM fragments WHERE pdbid=%s", (pdbid))
+        fragments = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+
+        return fragments #Better format later?
 
     

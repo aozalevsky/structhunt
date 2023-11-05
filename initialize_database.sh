@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # We install postgres and its dev tools
 sudo apt-get -y -qq update
 sudo apt-get -y -qq install postgresql postgresql-server-dev-all
@@ -18,4 +20,4 @@ pwd
 cmake ..
 sudo make install
 
-pip install sentence-transformers==2.2.2
+pip install sentence-transformers==2.2.2 psycopg2-binary
