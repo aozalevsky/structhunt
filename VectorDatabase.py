@@ -34,6 +34,7 @@ class Latern:
     def createTables(self):
         self.createFragmentTable()
         self.createPublicationTable()
+        self.createUnreadTable()
 
     def createFragmentTable(self):
         conn = self.conn
@@ -51,8 +52,18 @@ class Latern:
         conn = self.conn
         cursor = conn.cursor()
 
-        create_table_query = "CREATE TABLE IF NOT EXISTS publications (id text PRIMARY KEY, title text, pmc text, pubmed text, doi text)"
+        create_table_query = "CREATE TABLE IF NOT EXISTS publications (id text PRIMARY KEY, title text, pmc text, pubmed text, doi text);"
 
+        cursor.execute(create_table_query)
+
+        conn.commit()
+        cursor.close()
+
+    def createUnreadTable(self):
+        conn = self.conn
+        cursor = conn.cursor()
+
+        create_table_query = "CREATE TABLE IF NOT EXISTS unread (id text PRIMARY KEY);"
         cursor.execute(create_table_query)
 
         conn.commit()
@@ -90,9 +101,11 @@ class Latern:
         p = publication
 
         cursor.execute("INSERT INTO publications (id, title, pmc, pubmed, doi) VALUES (%s, %s, %s, %s, %s);", (p.id, p.title, p.pmc. p.pubmed, p.doi))
-
+        cursor.execute("INSERT INTO unread (id) VALUES (%s);", p.id)
         conn.commit()
         cursor.close()
+
+
 
     def getAllFragmentsOfPublication(self, id):
         conn = self.conn
@@ -110,4 +123,24 @@ class Latern:
         
         return fragmentObjects
 
-    
+
+    def getUnreadPublication(self):
+        conn = self.conn
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM publications AS p LEFT JOIN unread AS u WHERE p.id=u.id;')
+        cursor.execute('DELETE FROM unread;')
+
+        publications = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+
+
+        publicationObjects = []
+        for p in publications:
+            publicationObjects.append(Publication(p[0], p[1], p[2], p[3], p[4], p[5]))
+
+        return publicationObjects
+
+
+

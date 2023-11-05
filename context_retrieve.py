@@ -98,15 +98,6 @@ def Query(input_query, faiss_obj):
 
 
 def main():
-    """
-    """
-    ## Write to file
-    pmcid = 'PMC9935389' 
-    # pmcid = 'PMC10081221'
-    # TP
-    pmcid = 'PMC6022767'
-    # TN
-    pmcid = 'PMC8758698'
     text = getPmcPaper(pmcid)
     
     methods_text = preprocess(extractMethodsFromPmcPaper(text))
