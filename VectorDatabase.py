@@ -97,6 +97,9 @@ class Lantern:
         cursor.close()
 
     def insertPublication(self, p):
+        if self.publicationExists(p.id):
+            return
+
         conn = self.conn
         cursor = conn.cursor()
 

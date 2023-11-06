@@ -115,4 +115,4 @@ scrapeBiorxiv(start_date, end_date, out_file)
 
 biology = ['Bioinformatics', 'Molecular Biology', 'Bioengineering', 'Biochemistry']
 query = [biology]
-QUERY_FN_DICT['biorxiv'](query, output_filepath='keywords.jsonl')
+QUERY_FN_DICT.get('biorxiv', '')(query, output_filepath='keywords.jsonl')
