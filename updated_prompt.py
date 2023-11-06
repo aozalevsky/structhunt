@@ -196,6 +196,7 @@ def result_to_bool(result):
         flag = True
     return flag
 
+
 def embed_all(pmc_ids):
     #pmc_ids = ['PMC8536336', 'PMC7417587', 'PMC5957504', 'PMC7492086', 'PMC9293004', 
     #'PMC7854634', 'PMC5648754', 'PMC8022279', 'PMC8655018', 'PMC9279154']
