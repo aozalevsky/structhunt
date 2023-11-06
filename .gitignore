@@ -1,3 +1,5 @@
+input_file.txt
+input_doc/index.faiss
 __pycache__
 ./lantern
 data
