@@ -4,6 +4,8 @@ import PyPDF2
 from paperscraper.pdf import save_pdf
 from paperscraper.get_dumps import biorxiv
 from paperscraper.load_dumps import QUERY_FN_DICT
+from paperscraper.xrxiv.xrxiv_query import XRXivQuery
+
 
 import openai
 from langchain.document_loaders.csv_loader import CSVLoader
@@ -25,7 +27,7 @@ from publication import Publication
 
 
 # OpenAI Setup
-OPEN_API_KEY = "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"
+OPEN_API_KEY = "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"
 # openai.api_key = os.getenv(openai_api_key)
 os.environ['OPENAI_API_KEY'] = OPEN_API_KEY
 
@@ -61,13 +63,15 @@ def retreiveTextFromPdf(inp_file):
 
         ##NOTE: This is for example purpose only
         if n > 10:
-            break
+           break
+
+        paper_data = {'doi': doi}
+        doi = doi.replace("/", "-")
 
         if lantern.publicationExists(doi):
             continue
 
-        paper_data = {'doi': doi}
-        doi = doi.replace("/", "-")
+
         pdf_dir = './papers/'
         if not os.path.exists(pdf_dir):
             os.mkdir(pdf_dir)
@@ -113,6 +117,8 @@ out_file = "bio.jsonl"
 
 scrapeBiorxiv(start_date, end_date, out_file)
 
+
+querier = XRXivQuery('bio.jsonl')
 biology = ['Bioinformatics', 'Molecular Biology', 'Bioengineering', 'Biochemistry']
 query = [biology]
-QUERY_FN_DICT.get('biorxiv', '')(query, output_filepath='keywords.jsonl')
+querier.search_keywords(query, output_filepath='bio_key.jsonl')
