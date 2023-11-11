@@ -25,3 +25,13 @@ Latern creates the following two tables in the database:
 ## Usage
 
 VectorDatabase file, which has class Latern, provides the main functionality for the vector database. For example, you can insert an embedding with the insertEmbedding().
+
+## Dumping/restoring the database
+
+To dump the database for the backup/transfer one can use built-in Postgres command [`pg_dump`](https://www.postgresql.org/docs/current/backup-dump.html):
+
+`sudo -u postgres pg_dump structdb > structdb.sql`
+
+to restore the database from dump:
+
+`sudo -u postgres psql structdb < structdb.sql`
