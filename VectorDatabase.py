@@ -231,6 +231,8 @@ class Lantern:
 
     """
     Retrieves unread publications from the 'publications' table.
+    Parameters:
+        - delete_unread_entries: bool, decides if entries are deleted from the "unread" table
     Returns:
         - List[Publication], a list of Publication objects representing the unread publications.
     Notes:
@@ -238,7 +240,7 @@ class Lantern:
         - Clears the 'unread' table after retrieving the unread publications.
     """
 
-    def getUnreadPublications(self):
+    def getUnreadPublications(self, delete_unread_entries=True):
         conn = self.conn
         cursor = conn.cursor()
 
@@ -247,7 +249,9 @@ class Lantern:
 
         publications = cursor.fetchall()
 
-        cursor.execute('DELETE FROM unread;')
+        if delete_unread_entries:
+            cursor.execute('DELETE FROM unread;')
+            
         conn.commit()
         cursor.close()
 
