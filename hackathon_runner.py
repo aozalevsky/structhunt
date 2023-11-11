@@ -5,9 +5,7 @@ import PyPDF2
 from paperscraper.pdf import save_pdf
 from paperscraper.get_dumps import biorxiv
 
-from fragment import Fragment
-from publication import Publication
-from VectorDatabase import Lantern
+from VectorDatabase import Lantern, Fragment, Publication
 import openai
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
