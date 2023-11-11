@@ -283,3 +283,23 @@ class Lantern:
         cursor.close()
 
         return count[0] == 1
+
+    """
+    Fetches the content and embeddings of a publication by id 
+    Parameters:
+        - id: Text, the unique identifier of the publication.
+    Returns:
+        - [(text, embedding)] content of a publication's embeddings
+    Notes:
+    """
+    def get_embeddings_for_pub(self, id):
+        texts = []
+        embeddings = []
+        if not self.publicationExists(id):
+            return 
+        fragments = self.getAllFragmentsOfPublication(id)
+        for fragment in fragments:
+            texts.append(fragment.content)
+            embeddings.append(fragment.vector)
+        text_embeddings = list(zip(texts, embeddings))
+        return text_embeddings
