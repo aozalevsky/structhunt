@@ -77,7 +77,7 @@ class DocumentAnalyzer:
         msg = f"""
             This batch of paper analysis has concluded. 
             {len(rows)} papers were analyzed in total over the date range 11/2 - 11/3
-            {hits} {"were" if ((hits>0) or (hits == 0)) else was} classified as having multi-method structural data"""
+            {hits} {"were" if (hits != 1) else "was"} classified as having multi-method structural data"""
 
         if notify:
             sheets.notify_arthur(message=msg)
