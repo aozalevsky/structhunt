@@ -6,6 +6,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain import PromptTemplate
+from datetime import date
 
 class DocumentAnalyzer:
     """Takes in a list of publications to analyze, then prompts the chatbot, processes the response, aggregates the results,
@@ -37,7 +38,8 @@ class DocumentAnalyzer:
             else:
                 #print('paper not about cryo-em')
                 pass
-            rows.append([pub.doi, pub.title, "11-2-2023", "11-5-2023", "", int(classification), response, ""])
+            # add date if it's added 
+            rows.append([pub.doi, pub.title, "", str(date.today()), "", int(classification), response, ""])
 
         self.update_spreadsheet(rows, hits)
         
@@ -115,7 +117,6 @@ class LlmHandler:
     """
 
     def __init__(self):
-        self.text_splitter = RecursiveCharacterTextSplitter(separators = ["\n\n", "\n", ".", ","], chunk_size=300, chunk_overlap=100)
         self.llm=ChatOpenAI(
                 temperature=0, model_name="gpt-4", max_tokens=300, request_timeout = 30, max_retries=3
             )
