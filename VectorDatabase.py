@@ -1,7 +1,5 @@
 import psycopg2
-from fragment import Fragment
-from publication import Publication
-
+from database_entities import Fragment, Publication
 
 # Lantern class that exposes functionality of database to application
 class Lantern:
