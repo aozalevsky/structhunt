@@ -1,7 +1,5 @@
 import psycopg2
-from fragment import Fragment
-from publication import Publication
-
+from database_entities import Fragment, Publication
 
 # Lantern class that exposes functionality of database to application
 class Lantern:
@@ -231,6 +229,8 @@ class Lantern:
 
     """
     Retrieves unread publications from the 'publications' table.
+    Parameters:
+        - delete_unread_entries: bool, decides if entries are deleted from the "unread" table
     Returns:
         - List[Publication], a list of Publication objects representing the unread publications.
     Notes:
@@ -238,7 +238,7 @@ class Lantern:
         - Clears the 'unread' table after retrieving the unread publications.
     """
 
-    def getUnreadPublications(self):
+    def getUnreadPublications(self, delete_unread_entries=True):
         conn = self.conn
         cursor = conn.cursor()
 
@@ -247,7 +247,9 @@ class Lantern:
 
         publications = cursor.fetchall()
 
-        cursor.execute('DELETE FROM unread;')
+        if delete_unread_entries:
+            cursor.execute('DELETE FROM unread;')
+            
         conn.commit()
         cursor.close()
 
@@ -281,3 +283,23 @@ class Lantern:
         cursor.close()
 
         return count[0] == 1
+
+    """
+    Fetches the content and embeddings of a publication by id 
+    Parameters:
+        - id: Text, the unique identifier of the publication.
+    Returns:
+        - [(text, embedding)] content of a publication's embeddings
+    Notes:
+    """
+    def get_embeddings_for_pub(self, id):
+        texts = []
+        embeddings = []
+        if not self.publicationExists(id):
+            return 
+        fragments = self.getAllFragmentsOfPublication(id)
+        for fragment in fragments:
+            texts.append(fragment.content)
+            embeddings.append(fragment.vector)
+        text_embeddings = list(zip(texts, embeddings))
+        return text_embeddings
