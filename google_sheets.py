@@ -1,8 +1,12 @@
 import os
 import gspread
+import typing
 
-
-class SpreadsheetUpdater:
+class SheetsApiClient:
+    """interface for all functionality with google sheets
+    enables connection, append, and notification 
+    """
+    
     SPREADSHEET_NAME = "PDB-DEV_ChatGPT"
     SCHEMA = [
         "DOI",
@@ -21,6 +25,8 @@ class SpreadsheetUpdater:
         self.worksheet = self.spreadsheet.get_worksheet(0)
 
     def connect(self):
+        """connects to Google Sheets API service using private key file
+        """
         try:
             secret_file = os.path.join(os.getcwd(), "google_sheets_credentials.json")
             self.client = gspread.service_account(secret_file)
@@ -43,9 +49,9 @@ class SpreadsheetUpdater:
         self.worksheet.append_rows(rows)
 
     def notify_arthur(self, message: str):
-        """
+        """Shares the spreadsheet with arthur, along with the message in an email
         Args:
-            message (str): _description_
+            message (str): 
         """
         self.spreadsheet.share(
             "aozalevsky@gmail.com",
@@ -56,15 +62,24 @@ class SpreadsheetUpdater:
         )
 
     @staticmethod
-    def _check_row(row: [str]):
-        if len(row) != len(SpreadsheetUpdater.SCHEMA):
+    def _check_row(row: []):
+        """Checks row
+
+        Args:
+            row ([]): row of values to be added to worksheet
+
+        Raises:
+            ValueError: number of values in rows doesn't match schema
+        """
+        if len(row) != len(SheetsApiClient.SCHEMA):
             raise ValueError(
-                f"Row must have {len(SpreadsheetUpdater.SCHEMA)} fields in the order specified\n{SpreadsheetUpdater.SCHEMA}"
+                f"Row must have {len(SheetsApiClient.SCHEMA)} fields in the order specified\n{SheetsApiClient.SCHEMA}"
             )
 
 
 def main():
-    spread = SpreadsheetUpdater()
+    # some test code which initializes the client, then appends rows to the worksheet, then pings arthur
+    spread = SheetsApiClient()
     dummy_row = [
         "DOI",
         "Title",
