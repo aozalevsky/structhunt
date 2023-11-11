@@ -120,5 +120,6 @@ def main():
     faissIndex = FAISS.from_embeddings(text_embeddings=txt_embs, embedding=emb)
     inp_query = "Does the paper report a new structure of a biomolecule or biomolecular complex modeled using experimental data"
     Query(inp_query, faissIndex)
-    
-main()
+
+if __name__ == '__main__':  
+    main()
