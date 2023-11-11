@@ -10,26 +10,7 @@ from langchain import PromptTemplate
 class DocumentAnalyzer:
     """Takes in a list of publications to analyze, then prompts the chatbot, processes the response, aggregates the results,
     and reports the results to the spreadsheet
-    """
-    
-    keywords_groups = {
-        'CX-MS': ['cross-link', 'crosslink', 'XL-MS', 'CX-MS', 'CL-MS', 'XLMS', 'CXMS', 'CLMS', "chemical crosslinking mass spectrometry", 'photo-crosslinking', 'crosslinking restraints', 'crosslinking-derived restraints', 'chemical crosslinking', 'in vivo crosslinking', 'crosslinking data'],
-        'HDX': ['Hydrogen–deuterium exchange mass spectrometry', 'Hydrogen/deuterium exchange mass spectrometry' 'HDX', 'HDXMS', 'HDX-MS'],
-        'EPR': ['electron paramagnetic resonance spectroscopy', 'EPR', 'DEER', "Double electron electron resonance spectroscopy"],
-        'FRET': ['FRET',  "forster resonance energy transfer", "fluorescence resonance energy transfer"],
-        'AFM': ['AFM',  "atomic force microscopy" ],
-        'SAS': ['SAS', 'SAXS', 'SANS', "Small angle solution scattering", "solution scattering", "SEC-SAXS", "SEC-SAS", "SASBDB", "Small angle X-ray scattering", "Small angle neutron scattering"],
-        '3DGENOME': ['HiC', 'Hi-C', "chromosome conformation capture"],
-        'Y2H': ['Y2H', "yeast two-hybrid"],
-        'DNA_FOOTPRINTING': ["DNA Footprinting", "hydroxyl radical footprinting"],
-        'XRAY_TOMOGRAPHY': ["soft x-ray tomography"],
-        'FTIR': ["FTIR", "Infrared spectroscopy", "Fourier-transform infrared spectroscopy"],
-        'FLUORESCENCE': ["Fluorescence imaging", "fluorescence microscopy", "TIRF"],
-        'EVOLUTION': ['coevolution', "evolutionary covariance"],
-        'PREDICTED': ["predicted contacts"],
-        'INTEGRATIVE': ["integrative structure", "hybrid structure", "integrative modeling", "hybrid modeling"],
-        'SHAPE': ['Hydroxyl Acylation analyzed by Primer Extension']
-    }    
+    """  
     
     def __init__(self):
         # self.lantern = Lantern()
@@ -127,15 +108,6 @@ class DocumentAnalyzer:
             bool: True if the text mentions cryo-em 
         """
         return any(re.search("cryo-?em", text, re.IGNORECASE) for text, _ in embeddings)
-
-    @staticmethod
-    def methods_string():
-        methods_string = ''
-        for i, (k, v) in enumerate(DocumentAnalyzer.keywords_groups.items()):
-            if i > 0:
-                methods_string += ' or '
-            methods_string += f'{k} ({", ".join(v)})'
-        return methods_string
 
 
 class LlmHandler:
