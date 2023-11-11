@@ -1,6 +1,4 @@
-from fragment import Fragment
-from publication import Publication
-from VectorDatabase import Latern
+from VectorDatabase import Lantern, Fragment, Publication
 from tqdm.auto import tqdm
 from sentence_transformers import SentenceTransformer
 import torch

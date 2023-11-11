@@ -1,6 +1,5 @@
 
-from VectorDatabase import Lantern
-from database_entities import Publication, Fragment
+from VectorDatabase import Lantern, Publication, Fragment
 from google_sheets import SheetsApiClient
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
