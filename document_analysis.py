@@ -8,6 +8,7 @@ from langchain.chains import RetrievalQA
 from langchain import PromptTemplate
 from datetime import date
 
+
 class DocumentAnalyzer:
     """Takes in a list of publications to analyze, then prompts the chatbot, processes the response, aggregates the results,
     and reports the results to the spreadsheet
