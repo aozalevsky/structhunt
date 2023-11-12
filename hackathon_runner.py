@@ -260,7 +260,7 @@ def main():
     {hits} {"were" if ((hits>0) or (hits == 0)) else was} classified as having multi-method structural data
 """
   print(msg)
-  gs.notify_arthur(message=msg)
+  gs.email(message=msg)
 
 
 main()
