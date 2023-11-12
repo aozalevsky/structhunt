@@ -44,6 +44,7 @@ class SheetsApiClient:
     def append_rows(self, rows: [[str]]):
         """
         Adds a list of rows to the spreadsheet, each row must follow SCHEMA:
+        WARNING: Assumes that the [rows] list will never exceed the maximum throughput of one api call
         """
         for row in rows:
             self._check_row(row)
