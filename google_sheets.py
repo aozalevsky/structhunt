@@ -1,6 +1,6 @@
 import os
 import gspread
-import typing
+
 
 class SheetsApiClient:
     """interface for all functionality with google sheets
@@ -20,16 +20,17 @@ class SheetsApiClient:
     ]
 
     def __init__(self):
-        self.connect()
+        self.client = self.connect()
         self.spreadsheet = self.client.open(type(self).SPREADSHEET_NAME)
         self.worksheet = self.spreadsheet.get_worksheet(0)
 
-    def connect(self):
+    @staticmethod
+    def connect():
         """connects to Google Sheets API service using private key file
         """
         try:
             secret_file = os.path.join(os.getcwd(), "google_sheets_credentials.json")
-            self.client = gspread.service_account(secret_file)
+            return gspread.service_account(secret_file)
         except OSError as e:
             print(e)
 
@@ -43,23 +44,26 @@ class SheetsApiClient:
     def append_rows(self, rows: [[str]]):
         """
         Adds a list of rows to the spreadsheet, each row must follow SCHEMA:
+        WARNING: Assumes that the [rows] list will never exceed the maximum throughput of one api call
         """
         for row in rows:
             self._check_row(row)
         self.worksheet.append_rows(rows)
 
-    def notify_arthur(self, message: str):
+    def email(self, message: str, email_addresses: [str]):
         """Shares the spreadsheet with arthur, along with the message in an email
         Args:
-            message (str): 
+            message (str): message to be sent
+            email_addresses ([str]): recipients of notification
         """
-        self.spreadsheet.share(
-            "aozalevsky@gmail.com",
-            perm_type="user",
-            role="writer",
-            notify=True,
-            email_message=message,
-        )
+        for email_address in email_addresses:
+            self.spreadsheet.share(
+                email_address,
+                perm_type="user",
+                role="reader",
+                notify=True,
+                email_message=message,
+            )
 
     @staticmethod
     def _check_row(row: []):
