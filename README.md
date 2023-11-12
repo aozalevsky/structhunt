@@ -1,27 +1,56 @@
-# Latern Vector Database 
+# StructHunt
 
-## Installation
+## Overview
 
-Run `initialize_database.sh` to:
-1. Setup Postgres
-2. Create databases
-3. Install dependancies
+StructHunt is a program designed to scrape scientific articles from BioRXiv, parse them, convert them into embeddings, and perform analysis on whether they employ certain methodologies. The resulting information is then organized and stored in a CSV file. The program consists of several components that work together seamlessly to achieve this functionality.
 
-## Classes
-Fragment and Publication classes which contain a Python representation of datarow from table. 
+## Components
 
-## Database Structure
+### 1. `scraper.py`
 
-Latern creates the following two tables in the database:
+`scraper.py` is responsible for scraping BioRXiv to obtain scientific articles in PDF format. It utilizes external libraries and APIs to download these articles and then applies the necessary parsing logic to extract relevant information.
 
-1. `fragments` table:
-   - Columns: pdbid (text), header (text), content (text), vector (real[])
-   - Used to store information about molecular fragments, including their PDB ID, header, content, and associated vector data.
+### 2. `VectorDatabase.py`
 
-2. `publications` table:
-   - Columns: pdbid (text, primary key), title (text), pmc (text), pubmed (text), doi (text)
-   - Used to store information about publications related to the fragments, including their PDB ID, title, PMC, PubMed, and DOI.
+`VectorDatabase.py` contains the `Lantern` class, which is used to interact with a PostgreSQL database. The embeddings generated from the articles are input into the database, associating them with the corresponding publications.
 
-## Usage
+### 3. `runner.py`
 
-VectorDatabase file, which has class Latern, provides the main functionality for the vector database. For example, you can insert an embedding with the insertEmbedding().
+`runner.py` is the script responsible for managing the overall flow of the program. It identifies publications that haven't been processed, retrieves their IDs, and triggers subsequent processing steps.
+
+### 4. `chatgpt`
+
+The `chatgpt` component involves interacting with OpenAI's GPT-based language model. This is done using prompts generated from the `updated_prompt.py` script along with the embeddings retrieved from the previous step. The goal is to analyze whether the publications implement certain methodologies.
+
+### 5. `updated_prompt.py`
+
+`updated_prompt.py` generates prompts that are used to query the GPT model. These prompts are crafted based on the specific characteristics of the publications being analyzed.
+
+### 6. `CSV Output`
+
+The program populates a CSV file with the analysis results. This file contains information on whether the publications employ certain methodologies, providing a structured output for easy interpretation and further analysis.
+
+## Getting Started
+
+1. **Environment Setup:**
+    - Ensure that you have Python installed.
+    - Install the required Postgres Database and Python packages using `initialize_database.sh`.
+
+    ```bash
+    sudo ./initialize_database.sh
+    ```
+
+2. **Run the Program:**
+    - Execute `runner.py` to initiate the structured hunting process.
+
+```bash
+python runner.py
+```
+
+## Contributing
+
+Feel free to contribute to the development of StructHunt by submitting issues, feature requests, or pull requests. Your feedback and contributions are highly appreciated.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
