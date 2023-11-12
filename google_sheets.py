@@ -60,7 +60,7 @@ class SheetsApiClient:
             self.spreadsheet.share(
                 email_address,
                 perm_type="user",
-                role="writer",
+                role="reader",
                 notify=True,
                 email_message=message,
             )
