@@ -14,17 +14,17 @@ StructHunt is a program designed to scrape scientific articles from BioRXiv, par
 
 `VectorDatabase.py` contains the `Lantern` class, which is used to interact with a PostgreSQL database. The embeddings generated from the articles are input into the database, associating them with the corresponding publications.
 
-### 3. `runner.py`
+### 3. `hackathon_runner.py`
 
-`runner.py` is the script responsible for managing the overall flow of the program. It identifies publications that haven't been processed, retrieves their IDs, and triggers subsequent processing steps.
+`hackathon_runner.py` is the script responsible for managing the overall flow of the program. It identifies publications that haven't been processed, retrieves their IDs, and triggers subsequent processing steps.
 
 ### 4. `chatgpt`
 
 The `chatgpt` component involves interacting with OpenAI's GPT-based language model. This is done using prompts generated from the `updated_prompt.py` script along with the embeddings retrieved from the previous step. The goal is to analyze whether the publications implement certain methodologies.
 
-### 5. `updated_prompt.py`
+### 5. `prompts.py`
 
-`updated_prompt.py` generates prompts that are used to query the GPT model. These prompts are crafted based on the specific characteristics of the publications being analyzed.
+`prompts.py` generates prompts that are used to query the GPT model. These prompts are crafted based on the specific characteristics of the publications being analyzed.
 
 ### 6. `CSV Output`
 

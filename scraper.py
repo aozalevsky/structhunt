@@ -1,29 +1,26 @@
+# File: scraper.py
+# Description: This script defines functions for scraping and processing scientific papers from bioRxiv,
+# extracting text and embeddings, and storing the information in a custom database.
+# It also performs a keyword search on the obtained data.
+
+# Importing necessary libraries
 import os
 import pandas as pd
 import PyPDF2
+import argparse, datetime
 from paperscraper.pdf import save_pdf
 from paperscraper.get_dumps import biorxiv
-from paperscraper.load_dumps import QUERY_FN_DICT
 from paperscraper.xrxiv.xrxiv_query import XRXivQuery
 
-
-import openai
-from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import TextLoader
 
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain import PromptTemplate
 import PyPDF2
 
-from VectorDatabase import Lantern
-from fragment import Fragment
-from publication import Publication
+from VectorDatabase import Lantern, Fragment, Publication
 
 
 # OpenAI Setup
@@ -31,15 +28,26 @@ from publication import Publication
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
 
+"""
+Scrapes papers from bioRxiv between the specified dates and saves the metadata in a JSON file.
+
+:param start: Start date for the scraping (format: "YYYY-MM-DD").
+:param end: End date for the scraping (format: "YYYY-MM-DD").
+:param out_file: Output file to save the metadata in JSON Lines format.
+:return: None
+"""
 def scrapeBiorxiv(start, end, out_file):
     filepath = out_file
     biorxiv(begin_date=start, end_date=end, save_path=out_file)
     retreiveTextFromPdf(filepath)
 
+"""
+Retrieves text embeddings from a given text file using OpenAI's language model.
 
+:param fname: Path to the input text file.
+:return: A tuple containing text embeddings and the OpenAIEmbeddings instance.
+"""
 def get_embeddings(fname):
-    """
-    """
     loader = TextLoader(fname)
     documents = loader.load()
     text_splitter = CharacterTextSplitter(
@@ -54,17 +62,18 @@ def get_embeddings(fname):
     return text_embeddings, emb
 
 
+"""
+Retrieves text from PDF files, extracts embeddings, and stores information in a custom database.
+
+:param inp_file: Path to the input JSON file containing paper metadata.
+:return: None
+"""
 def retreiveTextFromPdf(inp_file):
 
     json = pd.read_json(path_or_buf=inp_file, lines=True)
     lantern = Lantern()
 
     for n, doi in enumerate(json['doi']):
-        print(n, doi)
-
-        # NOTE: This is for example purpose only
-        if n > 10:
-            break
 
         paper_data = {'doi': doi}
         doi = doi.replace("/", "-")
@@ -111,18 +120,19 @@ def retreiveTextFromPdf(inp_file):
         os.remove(pdfsavefile)
 
 
-start_date = "2023-10-30"
-end_date = "2023-10-31"
-out_file = "bio.jsonl"
+if __name__ == "__main__":
+    # Adding command line arguments for start_date and end_date with default values as the current date
+    parser = argparse.ArgumentParser(description="Scrape and process scientific papers from bioRxiv.")
+    parser.add_argument("--start-date", default=str(datetime.date.today()), help="Start date for the scraping (format: 'YYYY-MM-DD').")
+    parser.add_argument("--end-date", default=str(datetime.date.today()), help="End date for the scraping (format: 'YYYY-MM-DD').")
+    parser.add_argument("--outfile", default="bio.jsonl", help="Output file to save the metadata in JSON Lines format.")
+    args = parser.parse_args()
 
-scrapeBiorxiv(start_date, end_date, out_file)
+    # Calling the scrapeBiorxiv function with command line arguments
+    scrapeBiorxiv(args.start_date, args.end_date, args.out_file)
 
-
-querier = XRXivQuery('bio.jsonl')
-biology = [
-    'Bioinformatics',
-    'Molecular Biology',
-    'Bioengineering',
-    'Biochemistry']
-query = [biology]
-querier.search_keywords(query, output_filepath='bio_key.jsonl')
+    # Additional code for keyword search if needed
+    querier = XRXivQuery(args.out_file)
+    biology = ['Bioinformatics', 'Molecular Biology', 'Bioengineering', 'Biochemistry']
+    query = [biology]
+    querier.search_keywords(query, output_filepath='bio_key.jsonl')
