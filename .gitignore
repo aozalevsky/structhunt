@@ -3,3 +3,4 @@ input_doc/index.faiss
 __pycache__
 ./lantern
 data
+google_sheets_credentials.json

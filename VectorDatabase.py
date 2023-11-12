@@ -1,6 +1,38 @@
 import psycopg2
-from fragment import Fragment
-from publication import Publication
+
+
+# Class to represent a publication with attributes id, title, pmc, pubmed, and doi
+class Publication:
+    id = ""
+    title = ""
+    pmc = ""
+    pubmed = ""
+    doi = ""
+
+    def __init__(self, id, title, pmc, pubmed, doi):
+        self.id = id  # (DOI) Unique identifier for the publication
+        self.title = title  # Title of the publication
+        self.pmc = pmc  # PubMed Central (PMC) Link
+        self.pubmed = pubmed  # PubMed Link
+        self.doi = doi  # Digital Object Identifier (DOI) Link for the publication
+
+
+# Class to represent a fragment of a publication with attributes id, header, content, and vector
+class Fragment:
+    # Class variables to store default values for attributes
+    id = ""
+    header = ""
+    content = ""
+    vector = ""
+
+    def __init__(self, id, header, content, vector):
+        # Constructor to initialize the attributes of the Fragment object
+
+        # Set the attributes of the object with the values provided during instantiation
+        self.id = id  # (DOI) Unique identifier for the fragment
+        self.header = header  # Header or title of the fragment
+        self.content = content  # Content or text of the fragment
+        self.vector = vector  # Vector representation of the fragment
 
 
 # Lantern class that exposes functionality of database to application
@@ -231,6 +263,8 @@ class Lantern:
 
     """
     Retrieves unread publications from the 'publications' table.
+    Parameters:
+        - delete_unread_entries: bool, decides if entries are deleted from the "unread" table
     Returns:
         - List[Publication], a list of Publication objects representing the unread publications.
     Notes:
@@ -238,7 +272,7 @@ class Lantern:
         - Clears the 'unread' table after retrieving the unread publications.
     """
 
-    def getUnreadPublications(self):
+    def getUnreadPublications(self, delete_unread_entries=True):
         conn = self.conn
         cursor = conn.cursor()
 
@@ -247,7 +281,9 @@ class Lantern:
 
         publications = cursor.fetchall()
 
-        cursor.execute('DELETE FROM unread;')
+        if delete_unread_entries:
+            cursor.execute('DELETE FROM unread;')
+
         conn.commit()
         cursor.close()
 
@@ -281,3 +317,24 @@ class Lantern:
         cursor.close()
 
         return count[0] == 1
+
+    """
+    Fetches the content and embeddings of a publication by id 
+    Parameters:
+        - id: Text, the unique identifier of the publication.
+    Returns:
+        - [(text, embedding)] content of a publication's embeddings
+    Notes:
+    """
+
+    def get_embeddings_for_pub(self, id):
+        texts = []
+        embeddings = []
+        if not self.publicationExists(id):
+            return
+        fragments = self.getAllFragmentsOfPublication(id)
+        for fragment in fragments:
+            texts.append(fragment.content)
+            embeddings.append(fragment.vector)
+        text_embeddings = list(zip(texts, embeddings))
+        return text_embeddings
