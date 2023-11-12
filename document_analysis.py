@@ -1,10 +1,12 @@
 
 from VectorDatabase import Lantern, Publication, Fragment
 from google_sheets import SheetsApiClient
+from prompts import get_qbi_hackathon_prompt
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
+from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain import PromptTemplate
 from datetime import date
 
@@ -15,9 +17,15 @@ class DocumentAnalyzer:
     """  
     
     def __init__(self):
-        # self.lantern = Lantern()
+        self.lantern = Lantern()
         self.sheets = SheetsApiClient()
+        self.llm = LlmHandler()
     
+    def analyze_all_unread(self):
+        """pulls all new files from Lantern database, evaluates them, and publishes results to google sheets
+        """
+        publications = lantern.getUnreadPublications()
+        self.process_publications(publications)
 
     def process_publications(self, publications: [Publication]):
         """takes a list of publications, applies retrievalQA and processes responses
@@ -67,19 +75,22 @@ class DocumentAnalyzer:
             sheets.notify_arthur(message=msg)
         
 
-    def analyze_publication(self, publication: Publication):
-        """leaving this blank for now because i think the way these are stored is changing
+    def analyze_publication(self, text_embeddings: []):
+        """poses a question about the document, processes the result and returns it
+        NOTE: for now, only uses the hackathon question, might add more later
 
         Args:
-            publication (Publication): publication to be analyzed
+            text_embeddings ([]): list of (embedding, text) pairs from document to be analyzed
         
         Returns:
             bool: classification of response to query as positive (True) or negative (False) 
             str: response from chatGPT
         """
-        #faissIndex = FAISS.from_embeddings(text_embeddings=text_embeddings, embedding=open_ai_emb)
-        #result = llm.evaluate_queries(faissIndex, query)
-        response = None
+        # NOTE: These very likely need to change
+        open_ai_emb = OpenAIEmbeddings()
+        query = get_qbi_hackathon_prompt()
+        faissIndex = FAISS.from_embeddings(text_embeddings=text_embeddings, embedding=open_ai_emb)
+        response = self.llm.evaluate_queries(faissIndex, query)[0]
         return self.classify_response(response), response
 
     @staticmethod
@@ -131,24 +142,24 @@ class LlmHandler:
         )
         
         template = """ {query}? """
-        response = []
+        responses = []
         for q in queries:
             prompt = PromptTemplate(
                 input_variables=["query"],
                 template=template,
             )
 
-            response.append(chatbot.run(
+            responses.append(chatbot.run(
                 prompt.format(query=q)
             ))
-        return response
+        return responses
 
 
 
 
 def main():
-    x = DocumentAnalyzer()
-    l = LlmHandler()
+    document_analyzer = DocumentAnalyzer()
+    document_analyzer.analyze_all_unread() #analyzes all new files in lantern db
 
 if __name__ == '__main__':
     main()
