@@ -1,3 +1,4 @@
+import json
 import re
 
 from VectorDatabase import Lantern, Publication
@@ -18,13 +19,33 @@ class DocumentAnalyzer:
     aggregates the results, and reports the results to the spreadsheet
     """
 
+    CONFIG_PATH = "./config.json"
+
     def __init__(self):
         self.lantern = Lantern()
         self.sheets = SheetsApiClient()
         self.llm = LlmHandler()
 
-        self.email_addresses = []
-        self.notification_via_email = True
+        self.email_addresses, self.notification_via_email = self.parse_config()
+
+    @staticmethod
+    def parse_config():
+        try:
+            with open(DocumentAnalyzer.CONFIG_PATH, 'r') as config_file:
+                config_data = json.load(config_file)
+
+                # Extracting fields from the config_data
+                my_list = config_data.get('emails', [])  # Default to an empty list if 'my_list' is not present
+                my_bool = config_data.get('DEBUG', False)  # Default to False if 'my_bool' is not present
+
+                return my_list, my_bool
+
+        except FileNotFoundError:
+            print(f"Config file '{DocumentAnalyzer.CONFIG_PATH}' not found. Using defaults (no email addresses)")
+            return [], False
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON in '{DocumentAnalyzer.CONFIG_PATH}': {e}")
+            return None, None
 
     def analyze_all_unread(self):
         """pulls all new files from Lantern database, evaluates them, and publishes results to google sheets
@@ -162,7 +183,7 @@ class LlmHandler:
 
 def main():
     document_analyzer = DocumentAnalyzer()
-    document_analyzer.analyze_all_unread()  # analyzes all new files in lantern db
+    #document_analyzer.analyze_all_unread()  # analyzes all new files in lantern db
 
 
 if __name__ == '__main__':
